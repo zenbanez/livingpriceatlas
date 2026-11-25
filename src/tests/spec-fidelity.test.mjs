@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -151,7 +152,10 @@ for (const [label, src] of [
 // 6. Secret hygiene: no populated VITE_PULSE_CLIENT_ID in .env.example or src/
 const envExample = readUtf8('.env.example');
 assert.match(envExample, /^VITE_PULSE_CLIENT_ID=\s*$/m, '.env.example must keep empty placeholder');
-assert.equal(fs.existsSync(path.join(ROOT, '.env')), false, '.env must not exist in repository');
-assert.equal(fs.existsSync(path.join(ROOT, '.env.local')), false, '.env.local must not exist in repo');
+const trackedEnv = execFileSync('git', ['ls-files', '.env', '.env.local', '.env.production.local'], {
+  cwd: ROOT,
+  encoding: 'utf8',
+}).trim();
+assert.equal(trackedEnv, '', 'Local .env files must never be tracked in Git');
 
 console.log('ALL SPEC-FIDELITY & HALLMARK FLOOR CHECKS PASSED (6/6 groups)');
