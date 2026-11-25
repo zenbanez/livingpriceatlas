@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sectionReactions/{docId} {
+      // Tallies are strictly private to the steward (Admin / Console / gcloud).
+      allow read, delete: if false;
+
+      allow create, update: if
+        request.resource.data.keys().hasOnly([
+          'specId',
+          'sectionId',
+          'sectionHeading',
+          'vote',
+          'voterHash',
+          'updatedAt'
+        ])
+        && request.resource.data.specId in ['LPA001', 'LPA002', 'LPA003', 'LPA004']
+        && request.resource.data.vote in ['up', 'down', 'none']
+        && request.resource.data.sectionId is string
+        && request.resource.data.sectionId.size() >= 1
+        && request.resource.data.sectionId.size() <= 64
+        && request.resource.data.sectionHeading is string
+        && request.resource.data.sectionHeading.size() >= 1
+        && request.resource.data.sectionHeading.size() <= 200
+        && request.resource.data.voterHash is string
+        && request.resource.data.voterHash.matches('^[0-9a-f]{32}$')
+        && docId == (
+          request.resource.data.voterHash
+          + '_' + request.resource.data.specId
+          + '_' + request.resource.data.sectionId
+        )
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

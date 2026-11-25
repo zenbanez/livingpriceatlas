@@ -168,19 +168,34 @@ assert.ok(
 assert.ok(stylesCss.includes('oklch('), 'styles.css must use OKLCH design tokens');
 assert.equal(/transition\s*:\s*all/i.test(stylesCss), false, 'styles.css must never use transition: all');
 
-// 6. Zero UI-chrome em-dashes or glued arrows in HTML/TSX/catalog
+// 6. Zero UI-chrome em-dashes or glued arrows in HTML/TSX/modules
 const appTsx = readUtf8('src/App.tsx');
 const catalogTs = readUtf8('src/lib/specsCatalog.ts');
+const reactionsTs = readUtf8('src/lib/reactions.ts');
+const pulseTs = readUtf8('src/lib/pulse.ts');
 for (const [label, src] of [
   ['index.html', indexHtml],
   ['src/App.tsx', appTsx],
   ['src/lib/specsCatalog.ts', catalogTs],
+  ['src/lib/reactions.ts', reactionsTs],
+  ['src/lib/pulse.ts', pulseTs],
 ]) {
   assert.equal(src.includes('—'), false, `${label} must not contain UI-chrome em-dashes`);
   assert.equal(src.includes('→'), false, `${label} must not contain glued arrow glyphs`);
 }
 
-// 7. Secret hygiene: no tracked .env files
+// 7. Isolated Firestore database configuration (never touches Review x AI's default DB)
+const firebaseJson = JSON.parse(readUtf8('firebase.json'));
+assert.ok(Array.isArray(firebaseJson.firestore), 'firebase.json firestore must be an array');
+assert.equal(firebaseJson.firestore.length, 1, 'firebase.json must target only livingpriceatlas DB');
+assert.equal(firebaseJson.firestore[0].database, 'livingpriceatlas');
+const firestoreRules = readUtf8('firestore.livingpriceatlas.rules');
+assert.ok(
+  firestoreRules.includes('allow read, delete: if false;'),
+  'sectionReactions rules must keep tallies private to steward'
+);
+
+// 8. Secret hygiene: no tracked .env files
 const envExample = readUtf8('.env.example');
 assert.match(envExample, /^VITE_PULSE_CLIENT_ID=\s*$/m, '.env.example must keep empty placeholder');
 const trackedEnv = execFileSync('git', ['ls-files', '.env', '.env.local', '.env.production.local'], {
@@ -190,5 +205,5 @@ const trackedEnv = execFileSync('git', ['ls-files', '.env', '.env.local', '.env.
 assert.equal(trackedEnv, '', 'Local .env files must never be tracked in Git');
 
 console.log(
-  'ALL SPEC-FIDELITY & HALLMARK FLOOR CHECKS PASSED (4 specs, 5 figures, 56 invariants verified)'
+  'ALL SPEC-FIDELITY & HALLMARK FLOOR CHECKS PASSED (4 specs, 5 figures, 56 invariants, isolated Firestore rules)'
 );

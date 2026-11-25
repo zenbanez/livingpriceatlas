@@ -23,7 +23,27 @@ export function ensurePulseWidgetMounted(): void {
   document.body.appendChild(script);
 }
 
-function tryTriggerPulseOpen(): boolean {
+function applyPrefillIfEmpty(
+  input: HTMLInputElement | HTMLTextAreaElement,
+  prefillTag?: string
+): void {
+  if (!prefillTag || input.value.trim().length > 0) {
+    return;
+  }
+  const proto =
+    input instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
+  const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+  if (nativeSetter) {
+    nativeSetter.call(input, prefillTag);
+  } else {
+    input.value = prefillTag;
+  }
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function tryTriggerPulseOpen(prefillTag?: string): boolean {
   const host = document.getElementById('pulse-messages-root');
   const root = host?.shadowRoot;
   if (!root) {
@@ -32,8 +52,13 @@ function tryTriggerPulseOpen(): boolean {
 
   const chatWindow = root.querySelector('.chat-window');
   if (chatWindow) {
-    const input = root.querySelector<HTMLElement>('.chat-input input, .chat-input textarea');
-    input?.focus();
+    const input = root.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+      '.chat-input input, .chat-input textarea'
+    );
+    if (input) {
+      applyPrefillIfEmpty(input, prefillTag);
+      input.focus();
+    }
     return true;
   }
 
@@ -44,20 +69,31 @@ function tryTriggerPulseOpen(): boolean {
 
   if (launcher) {
     launcher.click();
+    if (prefillTag) {
+      window.setTimeout(() => {
+        const delayedInput = root.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          '.chat-input input, .chat-input textarea'
+        );
+        if (delayedInput) {
+          applyPrefillIfEmpty(delayedInput, prefillTag);
+          delayedInput.focus();
+        }
+      }, 120);
+    }
     return true;
   }
 
   return false;
 }
 
-export function openPulseWidget(): boolean {
+export function openPulseWidget(prefillTag?: string): boolean {
   if (!isPulseConfigured() || typeof document === 'undefined') {
     return false;
   }
 
   ensurePulseWidgetMounted();
 
-  if (tryTriggerPulseOpen()) {
+  if (tryTriggerPulseOpen(prefillTag)) {
     return true;
   }
 
@@ -69,7 +105,7 @@ export function openPulseWidget(): boolean {
   let attempts = 0;
   pendingRetryTimer = window.setInterval(() => {
     attempts += 1;
-    if (tryTriggerPulseOpen() || attempts >= 6) {
+    if (tryTriggerPulseOpen(prefillTag) || attempts >= 6) {
       if (pendingRetryTimer !== undefined) {
         window.clearInterval(pendingRetryTimer);
         pendingRetryTimer = undefined;

@@ -36,5 +36,16 @@ npm run dev
 Copy `.env.example` to gitignored `.env.local` and set `VITE_PULSE_CLIENT_ID=<public-client-id>` before running `npm test` and deploying to `livingpriceatlas-xai-suite` under Firebase project `xai-suite`:
 
 ```bash
-firebase deploy --only hosting:livingpriceatlas --project xai-suite
+firebase deploy --only firestore:livingpriceatlas,hosting:livingpriceatlas --project xai-suite
+```
+
+## Section Reactions (`livingpriceatlas` Firestore Database)
+
+Major sections (`Preamble`, `§1`–`§33`, `Closing Declaration`) include thumbs-up / thumbs-down controls persisted to the isolated named Firestore database `projects/xai-suite/databases/livingpriceatlas` (`sectionReactions/{voterHash}_{specId}_{sectionId}`). Security rules (`firestore.livingpriceatlas.rules`) enforce schema validation and `allow read, delete: if false;` so tallies remain private to the steward.
+
+Stewards can list reaction counts at any time with an authorized OAuth token (`gcloud auth print-access-token`):
+
+```bash
+curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  "https://firestore.googleapis.com/v1/projects/xai-suite/databases/livingpriceatlas/documents/sectionReactions?pageSize=200"
 ```

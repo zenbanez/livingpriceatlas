@@ -18,6 +18,51 @@ import {
   getFigureForSection,
   type SpecId,
 } from './lib/specsCatalog';
+import {
+  loadSavedVotes,
+  saveVotes,
+  submitSectionReaction,
+  type StoredVote,
+  type VoteValue,
+} from './lib/reactions';
+
+function ThumbUpIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 10v12" />
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+    </svg>
+  );
+}
+
+function ThumbDownIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M17 14V2" />
+      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" />
+    </svg>
+  );
+}
 
 interface StakeholderLens {
   id: string;
@@ -374,6 +419,9 @@ export default function App() {
   const [activeSectionId, setActiveSectionId] = useState('preamble');
   const [copyStatus, setCopyStatus] = useState('');
   const [pulseNoticeVisible, setPulseNoticeVisible] = useState(false);
+  const [votes, setVotes] = useState<Record<string, StoredVote>>(() => loadSavedVotes());
+  const [lastVotedKey, setLastVotedKey] = useState<string | null>(null);
+  const [reactionSavedOffline, setReactionSavedOffline] = useState(false);
 
   const activeSpecItem = useMemo(
     () => SPEC_SERIES.find((item) => item.id === activeSpecId) ?? SPEC_SERIES[0],
@@ -455,13 +503,49 @@ export default function App() {
     }
   }
 
-  function handleOpenFeedback(scrollFallback: boolean) {
-    const opened = openPulseWidget();
+  function handleOpenFeedback(scrollFallback: boolean, prefillTag?: string) {
+    const opened = openPulseWidget(prefillTag);
     if (!opened) {
       setPulseNoticeVisible(true);
       if (scrollFallback) {
         document.getElementById('feedback')?.scrollIntoView();
       }
+    }
+  }
+
+  async function handleVote(
+    specId: SpecId,
+    sectionId: string,
+    sectionHeading: string,
+    choice: StoredVote
+  ) {
+    const key = `${specId}_${sectionId}`;
+    const current = votes[key];
+    const nextVote: VoteValue = current === choice ? 'none' : choice;
+
+    const nextVotes: Record<string, StoredVote> = { ...votes };
+    if (nextVote === 'none') {
+      delete nextVotes[key];
+      if (lastVotedKey === key) {
+        setLastVotedKey(null);
+      }
+    } else {
+      nextVotes[key] = nextVote;
+      setLastVotedKey(key);
+    }
+
+    setVotes(nextVotes);
+    saveVotes(nextVotes);
+    setReactionSavedOffline(false);
+
+    const ok = await submitSectionReaction({
+      specId,
+      sectionId,
+      sectionHeading,
+      vote: nextVote,
+    });
+    if (!ok && nextVote !== 'none') {
+      setReactionSavedOffline(true);
     }
   }
 
@@ -919,6 +1003,14 @@ export default function App() {
 
                 {spec.sections.map((section) => {
                   const sectionFigure = getFigureForSection(activeSpecItem.id, section.id);
+                  const reactionKey = `${activeSpecItem.id}_${section.id}`;
+                  const currentVote = votes[reactionKey];
+                  const showReactionBar = lastVotedKey === reactionKey && currentVote !== undefined;
+                  const prefillPrefix =
+                    currentVote === 'up'
+                      ? `[+1 ${activeSpecItem.id} #${section.id} (${section.shortTitle})] `
+                      : `[Review ${activeSpecItem.id} #${section.id} (${section.shortTitle})] `;
+
                   return (
                     <section
                       key={`${activeSpecItem.id}-${section.id}`}
@@ -930,14 +1022,66 @@ export default function App() {
                         <h2 id={`heading-${section.id}`} className="spec-h2">
                           {section.heading}
                         </h2>
-                        <a
-                          className="section-anchor tabular"
-                          href={`#${section.id}`}
-                          aria-label={`Link to ${section.heading}`}
-                        >
-                          #{section.id}
-                        </a>
+                        <div className="spec-h2-tools">
+                          <div
+                            className="reaction-group"
+                            role="group"
+                            aria-label={`Feedback on ${section.heading}`}
+                          >
+                            <button
+                              type="button"
+                              className="reaction-btn reaction-up"
+                              aria-pressed={currentVote === 'up'}
+                              aria-label={`Thumbs up on ${section.heading}`}
+                              title="Sound and clear"
+                              onClick={() =>
+                                handleVote(activeSpecItem.id, section.id, section.heading, 'up')
+                              }
+                            >
+                              <ThumbUpIcon />
+                            </button>
+                            <button
+                              type="button"
+                              className="reaction-btn reaction-down"
+                              aria-pressed={currentVote === 'down'}
+                              aria-label={`Thumbs down on ${section.heading}`}
+                              title="Needs revision or question"
+                              onClick={() =>
+                                handleVote(activeSpecItem.id, section.id, section.heading, 'down')
+                              }
+                            >
+                              <ThumbDownIcon />
+                            </button>
+                          </div>
+                          <a
+                            className="section-anchor tabular"
+                            href={`#${section.id}`}
+                            aria-label={`Link to ${section.heading}`}
+                          >
+                            #{section.id}
+                          </a>
+                        </div>
                       </div>
+
+                      {showReactionBar && (
+                        <div className="section-reaction-bar" role="status">
+                          <span>
+                            {currentVote === 'up'
+                              ? `Feedback saved for ${activeSpecItem.id} · ${section.shortTitle}.`
+                              : `Flagged for review on ${activeSpecItem.id} · ${section.shortTitle}.`}
+                            {reactionSavedOffline ? ' (offline: saved locally)' : ''}
+                          </span>
+                          <button
+                            type="button"
+                            className="reaction-note-link"
+                            onClick={() => handleOpenFeedback(true, prefillPrefix)}
+                          >
+                            {currentVote === 'up'
+                              ? 'Add a note in Pulse'
+                              : 'Share what needs work in Pulse'}
+                          </button>
+                        </div>
+                      )}
 
                       <div className="spec-prose">
                         {renderSpecBlocks(section.blocks, `${activeSpecItem.id}-${section.id}`)}

@@ -933,6 +933,87 @@ summary:focus-visible,
   margin-bottom: 1rem;
 }
 
+.spec-h2-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.reaction-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.reaction-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-rule);
+  background-color: var(--color-paper-elevated);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 120ms ease;
+}
+
+.reaction-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.reaction-btn:active {
+  transform: translateY(1px);
+}
+
+.reaction-up[aria-pressed='true'] {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.reaction-down[aria-pressed='true'] {
+  background-color: oklch(94.5% 0.025 38);
+  border-color: var(--color-signal);
+  color: var(--color-signal);
+}
+
+.section-reaction-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.85rem;
+  margin: -0.35rem 0 1rem;
+  padding: 0.48rem 0.75rem;
+  background-color: var(--color-paper-2);
+  border-left: 2px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  color: var(--color-ink-muted);
+}
+
+.reaction-note-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.reaction-note-link:hover {
+  color: var(--color-accent-hover);
+}
+
 .spec-h2 {
   font-family: var(--font-display);
   font-size: clamp(1.38rem, 2.4vw, 1.75rem);
@@ -1170,6 +1251,8 @@ summary:focus-visible,
   .mobile-toc,
   .hero-actions,
   .plate-actions,
+  .spec-h2-tools,
+  .section-reaction-bar,
   .section-anchor,
   .site-footer,
   #pulse-messages-root {

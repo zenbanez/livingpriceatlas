@@ -1,4 +1,10 @@
 {
+  "firestore": [
+    {
+      "database": "livingpriceatlas",
+      "rules": "firestore.livingpriceatlas.rules"
+    }
+  ],
   "hosting": [
     {
       "target": "livingpriceatlas",
