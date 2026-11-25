@@ -36,6 +36,8 @@ export interface SpecMetadata {
   date: string;
   classification: string;
   status: string;
+  predecessors: string | null;
+  lineage: string | null;
   closingColophon: string;
   byteLength: number;
   sha256: string;
@@ -144,6 +146,16 @@ function parseSubsectionHeader(headingText: string): {
       title: matched[2].trim(),
     };
   }
+
+  const specRef = headingText.match(/^(LPA\d{3})\s+\S+\s+(.+)$/);
+  if (specRef) {
+    return {
+      id: `sub-${specRef[1].toLowerCase()}`,
+      number: specRef[1],
+      title: specRef[2].trim(),
+    };
+  }
+
   return {
     id: headingText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     number: '',
@@ -174,12 +186,23 @@ function appendLinesAsBlocks(lines: string[], target: SpecBlock[]): void {
       continue;
     }
 
-    const invariantMatch = trimmed.match(/^\*\*([IVX]+)\.\*\*\s+(.+)$/);
-    if (invariantMatch) {
+    const invariantInlineMatch = trimmed.match(/^\*\*([IVX]+)\.\*\*\s+(.+)$/);
+    if (invariantInlineMatch) {
       target.push({
         type: 'invariant',
-        numeral: invariantMatch[1],
-        text: invariantMatch[2],
+        numeral: invariantInlineMatch[1],
+        text: invariantInlineMatch[2],
+      });
+      i += 1;
+      continue;
+    }
+
+    const invariantWrappedMatch = trimmed.match(/^\*\*([IVX]+)\.\s+(.+?)\*\*$/);
+    if (invariantWrappedMatch) {
+      target.push({
+        type: 'invariant',
+        numeral: invariantWrappedMatch[1],
+        text: invariantWrappedMatch[2],
       });
       i += 1;
       continue;
@@ -215,14 +238,17 @@ function appendLinesAsBlocks(lines: string[], target: SpecBlock[]): void {
   }
 }
 
-export function parseSpecification(rawMarkdown: string): ParsedSpecification {
+export function parseSpecification(
+  rawMarkdown: string,
+  expectedSha256: string = CANONICAL_SHA256
+): ParsedSpecification {
   const normalized = rawMarkdown.replace(/\r\n/g, '\n');
   const lines = normalized.split('\n');
 
   const metaMap = new Map<string, string>();
-  let title = 'LPA001 — The Living Price Atlas';
-  let subtitle = 'Foundational Principles and Epistemic Framework';
-  let closingColophon = 'End of LPA001';
+  let title = 'The Living Price Atlas';
+  let subtitle = '';
+  let closingColophon = 'End of specification';
 
   let cursor = 0;
   while (cursor < lines.length) {
@@ -265,8 +291,9 @@ export function parseSpecification(rawMarkdown: string): ParsedSpecification {
     const line = lines[i];
     const trimmed = line.trim();
 
-    if (/^\*End of LPA001\*$/.test(trimmed)) {
-      closingColophon = 'End of LPA001';
+    const colophonMatch = trimmed.match(/^\*(End of LPA\d{3})\*$/);
+    if (colophonMatch) {
+      closingColophon = colophonMatch[1];
       continue;
     }
 
@@ -309,14 +336,16 @@ export function parseSpecification(rawMarkdown: string): ParsedSpecification {
     meta: {
       title,
       subtitle,
-      specification: metaMap.get('specification') ?? 'LPA001',
+      specification: metaMap.get('specification') ?? 'LPA',
       version: metaMap.get('version') ?? '1.0',
       date: metaMap.get('date') ?? 'November 25, 2026',
-      classification: metaMap.get('classification') ?? 'Foundational Specification',
+      classification: metaMap.get('classification') ?? 'Specification',
       status: metaMap.get('status') ?? 'Proposed for adoption',
+      predecessors: metaMap.get('predecessors') ?? metaMap.get('predecessor') ?? null,
+      lineage: metaMap.get('foundational lineage') ?? null,
       closingColophon,
       byteLength,
-      sha256: CANONICAL_SHA256,
+      sha256: expectedSha256,
     },
     sections,
   };
