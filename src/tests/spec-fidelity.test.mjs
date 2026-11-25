@@ -173,12 +173,14 @@ const appTsx = readUtf8('src/App.tsx');
 const catalogTs = readUtf8('src/lib/specsCatalog.ts');
 const reactionsTs = readUtf8('src/lib/reactions.ts');
 const pulseTs = readUtf8('src/lib/pulse.ts');
+const shareTs = readUtf8('src/lib/share.ts');
 for (const [label, src] of [
   ['index.html', indexHtml],
   ['src/App.tsx', appTsx],
   ['src/lib/specsCatalog.ts', catalogTs],
   ['src/lib/reactions.ts', reactionsTs],
   ['src/lib/pulse.ts', pulseTs],
+  ['src/lib/share.ts', shareTs],
 ]) {
   assert.equal(src.includes('—'), false, `${label} must not contain UI-chrome em-dashes`);
   assert.equal(src.includes('→'), false, `${label} must not contain glued arrow glyphs`);
@@ -204,6 +206,46 @@ const trackedEnv = execFileSync('git', ['ls-files', '.env', '.env.local', '.env.
 }).trim();
 assert.equal(trackedEnv, '', 'Local .env files must never be tracked in Git');
 
+// 9. Social media sharing metadata & raster Open Graph / icon PNG checks
+const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+for (const [relPath, expectedWidth, expectedHeight] of [
+  ['public/og-living-price-atlas.png', 1200, 630],
+  ['public/apple-touch-icon.png', 180, 180],
+  ['public/favicon-32x32.png', 32, 32],
+]) {
+  const pngBytes = readBytes(relPath);
+  assert.ok(pngBytes.length >= 24, `${relPath} must be a valid PNG file`);
+  assert.equal(
+    pngBytes.subarray(0, 8).equals(PNG_SIG),
+    true,
+    `${relPath} must start with valid PNG signature`
+  );
+  assert.equal(pngBytes.subarray(12, 16).toString('ascii'), 'IHDR', `${relPath} missing IHDR`);
+  const width = pngBytes.readUInt32BE(16);
+  const height = pngBytes.readUInt32BE(20);
+  assert.equal(width, expectedWidth, `${relPath} width must be ${expectedWidth}, got ${width}`);
+  assert.equal(height, expectedHeight, `${relPath} height must be ${expectedHeight}, got ${height}`);
+}
+
+for (const snippet of [
+  'property="og:site_name"',
+  'property="og:locale"',
+  'content="https://livingpriceatlas.banezglobal.com/og-living-price-atlas.png"',
+  'property="og:image:width" content="1200"',
+  'property="og:image:height" content="630"',
+  'name="twitter:image"',
+  'application/ld+json',
+]) {
+  assert.ok(indexHtml.includes(snippet), `index.html missing social metadata: ${snippet}`);
+}
+
+const ldMatch = indexHtml.match(
+  /<script type="application\/ld\+json">\s*([\s\S]*?)\s*<\/script>/
+);
+assert.ok(ldMatch && ldMatch[1], 'index.html JSON-LD script block missing');
+const ldJson = JSON.parse(ldMatch[1]);
+assert.ok(Array.isArray(ldJson['@graph']) && ldJson['@graph'].length >= 2, 'JSON-LD @graph invalid');
+
 console.log(
-  'ALL SPEC-FIDELITY & HALLMARK FLOOR CHECKS PASSED (4 specs, 5 figures, 56 invariants, isolated Firestore rules)'
+  'ALL SPEC-FIDELITY, SOCIAL-SHARING & HALLMARK FLOOR CHECKS PASSED (4 specs, 5 figures, 56 invariants, 1200x630 OG card)'
 );

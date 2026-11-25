@@ -25,6 +25,29 @@ import {
   type StoredVote,
   type VoteValue,
 } from './lib/reactions';
+import { buildShareUrl, buildSocialShareLinks, shareOrCopy } from './lib/share';
+
+function ShareIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
+}
 
 function ThumbUpIcon() {
   return (
@@ -422,6 +445,7 @@ export default function App() {
   const [votes, setVotes] = useState<Record<string, StoredVote>>(() => loadSavedVotes());
   const [lastVotedKey, setLastVotedKey] = useState<string | null>(null);
   const [reactionSavedOffline, setReactionSavedOffline] = useState(false);
+  const [copiedSectionKey, setCopiedSectionKey] = useState<string | null>(null);
 
   const activeSpecItem = useMemo(
     () => SPEC_SERIES.find((item) => item.id === activeSpecId) ?? SPEC_SERIES[0],
@@ -437,6 +461,16 @@ export default function App() {
   useEffect(() => {
     ensurePulseWidgetMounted();
   }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    document.title =
+      activeSpecItem.id === 'LPA001'
+        ? 'The Living Price Atlas · Specifications LPA001 to LPA004 (v1.0)'
+        : `The Living Price Atlas · ${activeSpecItem.id}: ${activeSpecItem.shortTitle} (v1.0)`;
+  }, [activeSpecItem]);
 
   useEffect(() => {
     if (!pendingScrollAnchor || typeof document === 'undefined') {
@@ -503,6 +537,38 @@ export default function App() {
     }
   }
 
+  async function handleShareSpec() {
+    const url = buildShareUrl(activeSpecItem.id);
+    const title = `The Living Price Atlas · ${activeSpecItem.id}: ${activeSpecItem.shortTitle} (v${spec.meta.version})`;
+    const result = await shareOrCopy({
+      title,
+      text: activeSpecItem.focusSummary,
+      url,
+    });
+    if (result === 'shared') {
+      setCopyStatus(`${activeSpecItem.id} link shared.`);
+    } else if (result === 'copied') {
+      setCopyStatus(`${activeSpecItem.id} share link copied to clipboard.`);
+    } else if (result === 'unavailable') {
+      setCopyStatus(`Share unavailable in this browser; URL is ${url}`);
+    }
+  }
+
+  async function handleCopySectionLink(specId: SpecId, sectionId: string, sectionHeading: string) {
+    const url = buildShareUrl(specId, sectionId);
+    const key = `${specId}_${sectionId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedSectionKey(key);
+      setCopyStatus(`Link to ${specId} ${sectionHeading} copied to clipboard.`);
+      window.setTimeout(() => {
+        setCopiedSectionKey((prev) => (prev === key ? null : prev));
+      }, 2200);
+    } catch {
+      setCopyStatus(`Copy unavailable in this browser; section anchor is #${sectionId}.`);
+    }
+  }
+
   function handleOpenFeedback(scrollFallback: boolean, prefillTag?: string) {
     const opened = openPulseWidget(prefillTag);
     if (!opened) {
@@ -566,6 +632,11 @@ export default function App() {
   }
 
   const citationText = `The Living Price Atlas: ${activeSpecItem.shortTitle} (${activeSpecItem.id} v${spec.meta.version}, ${spec.meta.date}). https://livingpriceatlas.banezglobal.com/?spec=${activeSpecItem.id} · sha256:${activeSpecItem.sha256}`;
+  const specShareUrl = buildShareUrl(activeSpecItem.id);
+  const socialLinks = buildSocialShareLinks(
+    specShareUrl,
+    `The Living Price Atlas · ${activeSpecItem.id}: ${activeSpecItem.shortTitle} (v${spec.meta.version})`
+  );
 
   return (
     <>
@@ -748,6 +819,47 @@ export default function App() {
                 >
                   Public Source Repo
                 </a>
+              </div>
+
+              <div className="plate-share-row" role="group" aria-label="Share active specification">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-compact"
+                  onClick={handleShareSpec}
+                >
+                  <ShareIcon />
+                  <span>Share {activeSpecItem.id}</span>
+                </button>
+                <div className="plate-share-links">
+                  <span className="plate-share-label">Post on:</span>
+                  <a
+                    className="plate-share-link"
+                    href={socialLinks.linkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Share ${activeSpecItem.id} on LinkedIn`}
+                  >
+                    LinkedIn
+                  </a>
+                  <a
+                    className="plate-share-link"
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Share ${activeSpecItem.id} on Facebook`}
+                  >
+                    Facebook
+                  </a>
+                  <a
+                    className="plate-share-link"
+                    href={socialLinks.x}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Share ${activeSpecItem.id} on X`}
+                  >
+                    X
+                  </a>
+                </div>
               </div>
 
               <p className="copy-feedback" aria-live="polite">
@@ -1060,6 +1172,26 @@ export default function App() {
                           >
                             #{section.id}
                           </a>
+                          <button
+                            type="button"
+                            className="section-share-btn"
+                            data-copied={copiedSectionKey === reactionKey ? 'true' : undefined}
+                            aria-label={`Copy share link to ${section.heading}`}
+                            title="Copy shareable section link"
+                            onClick={() =>
+                              handleCopySectionLink(
+                                activeSpecItem.id,
+                                section.id,
+                                section.heading
+                              )
+                            }
+                          >
+                            {copiedSectionKey === reactionKey ? (
+                              <span className="section-share-copied">Copied</span>
+                            ) : (
+                              <ShareIcon />
+                            )}
+                          </button>
                         </div>
                       </div>
 
