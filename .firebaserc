@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "xai-suite"
+  },
+  "targets": {
+    "xai-suite": {
+      "hosting": {
+        "livingpriceatlas": ["livingpriceatlas-xai-suite"]
+      }
+    }
+  }
+}
