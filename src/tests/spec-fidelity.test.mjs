@@ -246,6 +246,20 @@ assert.ok(ldMatch && ldMatch[1], 'index.html JSON-LD script block missing');
 const ldJson = JSON.parse(ldMatch[1]);
 assert.ok(Array.isArray(ldJson['@graph']) && ldJson['@graph'].length >= 2, 'JSON-LD @graph invalid');
 
+// 10. Hero Economic Triangulation narrative & Powered by Pulse attribution
+for (const heroSnippet of [
+  'How much does a km of road cost?',
+  'How much does a sq.m. of multi-purpose building cost?',
+  'What is a &apos;fair price&apos;?',
+  'The answer is not so easy:',
+  'A single correct price today might not be applicable tomorrow.',
+  'Help us build The Living Price Atlas',
+  'https://pulsemessages.com',
+  'Powered by Pulse',
+]) {
+  assert.ok(appTsx.includes(heroSnippet), `src/App.tsx missing Hero/Pulse element: ${heroSnippet}`);
+}
+
 console.log(
   'ALL SPEC-FIDELITY, SOCIAL-SHARING & HALLMARK FLOOR CHECKS PASSED (4 specs, 5 figures, 56 invariants, 1200x630 OG card)'
 );

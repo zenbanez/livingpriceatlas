@@ -49,6 +49,128 @@ function ShareIcon() {
   );
 }
 
+function PoweredByPulseBadge() {
+  return (
+    <a
+      className="powered-by-pulse"
+      href="https://pulsemessages.com"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span className="powered-by-pulse-dot" aria-hidden="true" />
+      <span>Powered by Pulse</span>
+    </a>
+  );
+}
+
+function EconomicTriangulationHeroCard({ totalInvariants }: { totalInvariants: number }) {
+  return (
+    <div className="triangulation-card">
+      <p className="triangulation-kicker tabular">ECONOMIC TRIANGULATION</p>
+      <svg
+        className="triangulation-svg"
+        viewBox="0 0 360 242"
+        role="img"
+        aria-label="Economic Triangulation diagram: Historical, Market, and Realized evidence converging on a Reasonable Cost Envelope"
+      >
+        {/* Triangle edges connecting Historical (top), Market (left), Realized (right) */}
+        <polygon
+          points="180,44 74,192 286,192"
+          fill="none"
+          stroke="#bfb7a8"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        {/* Converging spokes from each triangulation vertex */}
+        <line x1="180" y1="44" x2="180" y2="138" stroke="#255d7c" strokeWidth="2.2" />
+        <line x1="74" y1="192" x2="180" y2="138" stroke="#255d7c" strokeWidth="2.2" />
+        <line x1="286" y1="192" x2="180" y2="138" stroke="#255d7c" strokeWidth="2.2" />
+
+        {/* Central Reasonable Cost Envelope circle & Terracotta center */}
+        <circle cx="180" cy="138" r="44" fill="#e6eff4" stroke="#255d7c" strokeWidth="2.6" />
+        <circle cx="180" cy="138" r="8.5" fill="#c4613b" />
+
+        {/* Vertex pills */}
+        <g>
+          <rect
+            x="130"
+            y="14"
+            width="100"
+            height="28"
+            rx="5"
+            fill="#efeadf"
+            stroke="#bfb7a8"
+            strokeWidth="1.2"
+          />
+          <text
+            x="180"
+            y="32"
+            textAnchor="middle"
+            fill="#25211d"
+            fontSize="13.5"
+            fontWeight="600"
+            fontFamily="var(--font-sans)"
+          >
+            Historical
+          </text>
+        </g>
+
+        <g>
+          <rect
+            x="22"
+            y="196"
+            width="88"
+            height="28"
+            rx="5"
+            fill="#efeadf"
+            stroke="#bfb7a8"
+            strokeWidth="1.2"
+          />
+          <text
+            x="66"
+            y="214"
+            textAnchor="middle"
+            fill="#25211d"
+            fontSize="13.5"
+            fontWeight="600"
+            fontFamily="var(--font-sans)"
+          >
+            Market
+          </text>
+        </g>
+
+        <g>
+          <rect
+            x="246"
+            y="196"
+            width="92"
+            height="28"
+            rx="5"
+            fill="#efeadf"
+            stroke="#bfb7a8"
+            strokeWidth="1.2"
+          />
+          <text
+            x="292"
+            y="214"
+            textAnchor="middle"
+            fill="#25211d"
+            fontSize="13.5"
+            fontWeight="600"
+            fontFamily="var(--font-sans)"
+          >
+            Realized
+          </text>
+        </g>
+      </svg>
+      <p className="triangulation-caption">Reasonable Cost Envelope</p>
+      <p className="triangulation-meta tabular">
+        {totalInvariants} INVARIANTS · 4 SPECS · OPEN v1.0
+      </p>
+    </div>
+  );
+}
+
 function ThumbUpIcon() {
   return (
     <svg
@@ -675,8 +797,8 @@ export default function App() {
 
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <div className="container hero-grid">
-            <div className="hero-lead">
+          <div className="container">
+            <div className="hero-top">
               <p className="status-line">
                 <span className="status-dot" aria-hidden="true" />
                 <span className="tabular">
@@ -687,37 +809,106 @@ export default function App() {
               <h1 id="hero-title" className="hero-title">
                 The Living Price Atlas
               </h1>
-              <p className="hero-subtitle">
-                Open infrastructure for what construction and development actually cost in context.
+              <p className="hero-lead-tagline">
+                Live prices are not open yet. First, help us settle the rules for measuring real
+                cost in context.
               </p>
-              <p className="hero-summary">
-                Live price lookups and API feeds are not open yet. First, we are publishing the
-                core rules (LPA001 to LPA004) so engineers, builders, agencies, and toolmakers
-                can critique the model before the data layer launches.
-              </p>
+            </div>
 
-              <div className="hero-actions">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => handleOpenFeedback(false)}
-                >
-                  Ask a Question / Early Data Access
-                </button>
-                <a className="btn btn-secondary" href="#specification">
-                  Read {activeSpecItem.id}
-                </a>
-                <a className="btn btn-secondary" href="#series">
-                  All 4 Specs ({totalInvariants} Invariants)
-                </a>
+            <div className="triangulation-stage">
+              <div className="thought-col thought-col-left" aria-label="Common cost questions">
+                <div className="thought-bubble thought-tail-right">
+                  &ldquo;How much does a km of road cost?&rdquo;
+                </div>
+                <div className="thought-bubble thought-bubble-accent thought-tail-right">
+                  &ldquo;What is a &apos;fair price&apos;?&rdquo;
+                </div>
               </div>
+
+              <div className="triangulation-center">
+                <EconomicTriangulationHeroCard totalInvariants={totalInvariants} />
+              </div>
+
+              <div className="thought-col thought-col-right" aria-label="Building cost question">
+                <div className="thought-bubble thought-tail-left">
+                  &ldquo;How much does a sq.m. of multi-purpose building cost?&rdquo;
+                </div>
+              </div>
+            </div>
+
+            <div className="reality-strip">
+              <p className="reality-heading">The answer is not so easy:</p>
+              <ul className="reality-grid">
+                <li>
+                  <span className="reality-dot" aria-hidden="true" />
+                  <span>Price changes regularly</span>
+                </li>
+                <li>
+                  <span className="reality-dot" aria-hidden="true" />
+                  <span>Location affects unit costs</span>
+                </li>
+                <li>
+                  <span className="reality-dot" aria-hidden="true" />
+                  <span>Logistics must be taken into account</span>
+                </li>
+              </ul>
+              <p className="reality-punchline">
+                A single correct price today might not be applicable tomorrow.
+              </p>
+            </div>
+
+            <aside className="hero-sell-plate" aria-label="How to participate and specification provenance">
+              <div className="sell-header">
+                <h2 className="sell-title">Help us build The Living Price Atlas</h2>
+                <PoweredByPulseBadge />
+              </div>
+
+              <ol className="hero-steps">
+                <li>
+                  <a className="hero-step-card" href="#specification">
+                    <span className="hero-step-num tabular">1</span>
+                    <span>
+                      <span className="hero-step-title">Read the proposed architecture</span>
+                      <span className="hero-step-desc">
+                        Inspect {SPEC_SERIES.map((s) => s.id).join(', ')} (v1.0) verbatim.
+                      </span>
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a className="hero-step-card" href="#specification">
+                    <span className="hero-step-num tabular">2</span>
+                    <span>
+                      <span className="hero-step-title">Thumbs up or thumbs down each section</span>
+                      <span className="hero-step-desc">
+                        Signal what holds up on the ground or needs work.
+                      </span>
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="hero-step-card hero-step-cta"
+                    onClick={() => handleOpenFeedback(false)}
+                  >
+                    <span className="hero-step-num tabular">3</span>
+                    <span>
+                      <span className="hero-step-title">Ask a question to our Pulse AI Agent</span>
+                      <span className="hero-step-desc">
+                        Challenge an assumption or leave an email for early data access.
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ol>
 
               {pulseNoticeVisible && !pulseConfigured && (
                 <div className="pulse-notice" role="status">
                   <p>
                     <strong>Interactive Pulse feedback widget is completing setup.</strong> Once
-                    wired to the Living Price Atlas Pulse tenant, this button opens live chat
-                    directly inside the page.
+                    wired to the Living Price Atlas Pulse tenant, Step 3 opens live chat directly
+                    inside the page.
                   </p>
                   <p>
                     In the meantime, review any specification below or file a section-cited issue at{' '}
@@ -732,37 +923,6 @@ export default function App() {
                   </p>
                 </div>
               )}
-            </div>
-
-            <aside className="provenance-plate" aria-label="Project stage and specification provenance">
-              <div className="plate-header">
-                <h2 className="plate-title">Where We Are Now</h2>
-                <span className="plate-kicker tabular">v1.0 Open Review</span>
-              </div>
-
-              <ol className="stage-list">
-                <li className="stage-item stage-item-active">
-                  <span className="stage-badge tabular">Now</span>
-                  <div className="stage-copy">
-                    <strong>Core Specifications (LPA001 to LPA004)</strong>
-                    <p>{totalInvariants} invariants for contextual cost envelopes, open for public critique.</p>
-                  </div>
-                </li>
-                <li className="stage-item">
-                  <span className="stage-badge tabular">Next</span>
-                  <div className="stage-copy">
-                    <strong>Governance &amp; Reference Design (LPA005 to LPA009)</strong>
-                    <p>Refined with feedback from engineers, contractors, suppliers, and agencies.</p>
-                  </div>
-                </li>
-                <li className="stage-item">
-                  <span className="stage-badge tabular">Then</span>
-                  <div className="stage-copy">
-                    <strong>Live Cost Envelopes &amp; API</strong>
-                    <p>Contextual price ranges anchored on public baselines and real field data.</p>
-                  </div>
-                </li>
-              </ol>
 
               <div className="plate-share-row" role="group" aria-label="Share active specification">
                 <button
@@ -1048,6 +1208,9 @@ export default function App() {
                     You can message directly in the Pulse widget right away, or use 1-click Google
                     Sign-In inside the widget header if you want your thread saved for follow-up.
                   </p>
+                  <div>
+                    <PoweredByPulseBadge />
+                  </div>
                   {pulseNoticeVisible && !pulseConfigured && (
                     <div className="pulse-notice" role="status">
                       <p>
@@ -1317,6 +1480,7 @@ export default function App() {
             >
               GitHub Repository
             </a>
+            <PoweredByPulseBadge />
           </div>
         </div>
       </footer>
