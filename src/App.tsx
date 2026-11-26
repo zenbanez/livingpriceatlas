@@ -659,21 +659,15 @@ export default function App() {
           </div>
 
           <nav className="masthead-nav" aria-label="Primary navigation">
-            <a href="#series">Specifications (1 to 4)</a>
+            <a href="#series">4 Specifications</a>
             <a href="#specification">Read {activeSpecItem.id}</a>
-            <a href={`#${activeSpecItem.invariantsSectionId}`}>
-              {activeSpecItem.invariantsCount} Invariants
-            </a>
-            <a href="#feedback">Feedback &amp; Support</a>
-            <a href={activeSpecItem.downloadHref} download={activeSpecItem.downloadFilename}>
-              Download {activeSpecItem.id}
-            </a>
+            <a href="#feedback">Review Prompts</a>
             <button
               type="button"
               className="btn btn-primary btn-compact"
-              onClick={() => handleOpenFeedback(true)}
+              onClick={() => handleOpenFeedback(false)}
             >
-              Share Feedback
+              Ask / Early Access
             </button>
           </nav>
         </div>
@@ -686,7 +680,7 @@ export default function App() {
               <p className="status-line">
                 <span className="status-dot" aria-hidden="true" />
                 <span className="tabular">
-                  Living Price Atlas Series · LPA001 to LPA004 (v1.0) · {totalInvariants} Invariants
+                  Phase 1: Open Specification Review · Dataset &amp; API Next
                 </span>
               </p>
 
@@ -694,14 +688,12 @@ export default function App() {
                 The Living Price Atlas
               </h1>
               <p className="hero-subtitle">
-                From Foundational Epistemic Principles (LPA001) to Domain Inheritance (LPA002),
-                Contextual Cost Modeling (LPA003), and Reciprocal Participation (LPA004)
+                Open infrastructure for what construction and development actually cost in context.
               </p>
               <p className="hero-summary">
-                Published openly so engineers, contractors, suppliers, public institutions,
-                researchers, local enterprises, and citizens can inspect the full specification stack
-                verbatim, challenge weak assumptions before LPA005 to LPA009 lock in, and help build
-                verifiable development cost intelligence.
+                Live price lookups and API feeds are not open yet. First, we are publishing the
+                core rules (LPA001 to LPA004) so engineers, builders, agencies, and toolmakers
+                can critique the model before the data layer launches.
               </p>
 
               <div className="hero-actions">
@@ -710,17 +702,13 @@ export default function App() {
                   className="btn btn-primary"
                   onClick={() => handleOpenFeedback(false)}
                 >
-                  Open Feedback &amp; Support Channel
+                  Ask a Question / Early Data Access
                 </button>
-                <a className="btn btn-secondary" href="#series">
-                  Browse All 4 Specifications
+                <a className="btn btn-secondary" href="#specification">
+                  Read {activeSpecItem.id}
                 </a>
-                <a
-                  className="btn btn-secondary"
-                  href={activeSpecItem.downloadHref}
-                  download={activeSpecItem.downloadFilename}
-                >
-                  Download {activeSpecItem.id} Markdown
+                <a className="btn btn-secondary" href="#series">
+                  All 4 Specs ({totalInvariants} Invariants)
                 </a>
               </div>
 
@@ -746,80 +734,35 @@ export default function App() {
               )}
             </div>
 
-            <aside className="provenance-plate" aria-label="Active specification provenance">
+            <aside className="provenance-plate" aria-label="Project stage and specification provenance">
               <div className="plate-header">
-                <h2 className="plate-title">Specification Provenance</h2>
-                <span className="plate-kicker tabular">{activeSpecItem.id}</span>
+                <h2 className="plate-title">Where We Are Now</h2>
+                <span className="plate-kicker tabular">v1.0 Open Review</span>
               </div>
 
-              <dl className="plate-list">
-                <dt>Document ID</dt>
-                <dd className="tabular">
-                  {spec.meta.specification} · v{spec.meta.version}
-                </dd>
-
-                <dt>Title</dt>
-                <dd>{activeSpecItem.shortTitle}</dd>
-
-                <dt>Classification</dt>
-                <dd>{spec.meta.classification}</dd>
-
-                {spec.meta.predecessors && (
-                  <>
-                    <dt>Predecessors</dt>
-                    <dd className="tabular">{spec.meta.predecessors}</dd>
-                  </>
-                )}
-
-                {spec.meta.lineage && (
-                  <>
-                    <dt>Lineage</dt>
-                    <dd>{spec.meta.lineage}</dd>
-                  </>
-                )}
-
-                <dt>Published</dt>
-                <dd className="tabular">
-                  {spec.meta.date} ({spec.meta.status})
-                </dd>
-
-                <dt>Canonical Size</dt>
-                <dd className="tabular">
-                  {activeSpecItem.byteLength.toLocaleString('en-US')} bytes (LF)
-                </dd>
-
-                <dt>SHA-256</dt>
-                <dd className="plate-mono tabular" title={activeSpecItem.sha256}>
-                  {activeSpecItem.sha256.slice(0, 12)}...{activeSpecItem.sha256.slice(-8)}
-                </dd>
-              </dl>
-
-              <div className="plate-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-compact"
-                  onClick={() =>
-                    handleCopy(activeSpecItem.sha256, `${activeSpecItem.id} SHA-256 checksum`)
-                  }
-                >
-                  Copy SHA-256
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-compact"
-                  onClick={() => handleCopy(citationText, `${activeSpecItem.id} citation`)}
-                >
-                  Copy Citation
-                </button>
-                <a
-                  className="plate-repo-link"
-                  href="https://github.com/zenbanez/livingpriceatlas"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Public Source Repo
-                </a>
-              </div>
+              <ol className="stage-list">
+                <li className="stage-item stage-item-active">
+                  <span className="stage-badge tabular">Now</span>
+                  <div className="stage-copy">
+                    <strong>Core Specifications (LPA001 to LPA004)</strong>
+                    <p>{totalInvariants} invariants for contextual cost envelopes, open for public critique.</p>
+                  </div>
+                </li>
+                <li className="stage-item">
+                  <span className="stage-badge tabular">Next</span>
+                  <div className="stage-copy">
+                    <strong>Governance &amp; Reference Design (LPA005 to LPA009)</strong>
+                    <p>Refined with feedback from engineers, contractors, suppliers, and agencies.</p>
+                  </div>
+                </li>
+                <li className="stage-item">
+                  <span className="stage-badge tabular">Then</span>
+                  <div className="stage-copy">
+                    <strong>Live Cost Envelopes &amp; API</strong>
+                    <p>Contextual price ranges anchored on public baselines and real field data.</p>
+                  </div>
+                </li>
+              </ol>
 
               <div className="plate-share-row" role="group" aria-label="Share active specification">
                 <button
@@ -861,6 +804,88 @@ export default function App() {
                   </a>
                 </div>
               </div>
+
+              <details className="plate-details">
+                <summary className="plate-details-summary tabular">
+                  {activeSpecItem.id} Checksum, Citation &amp; Raw Markdown
+                </summary>
+
+                <dl className="plate-list">
+                  <dt>Document ID</dt>
+                  <dd className="tabular">
+                    {spec.meta.specification} · v{spec.meta.version}
+                  </dd>
+
+                  <dt>Title</dt>
+                  <dd>{activeSpecItem.shortTitle}</dd>
+
+                  <dt>Classification</dt>
+                  <dd>{spec.meta.classification}</dd>
+
+                  {spec.meta.predecessors && (
+                    <>
+                      <dt>Predecessors</dt>
+                      <dd className="tabular">{spec.meta.predecessors}</dd>
+                    </>
+                  )}
+
+                  {spec.meta.lineage && (
+                    <>
+                      <dt>Lineage</dt>
+                      <dd>{spec.meta.lineage}</dd>
+                    </>
+                  )}
+
+                  <dt>Published</dt>
+                  <dd className="tabular">
+                    {spec.meta.date} ({spec.meta.status})
+                  </dd>
+
+                  <dt>Canonical Size</dt>
+                  <dd className="tabular">
+                    {activeSpecItem.byteLength.toLocaleString('en-US')} bytes (LF)
+                  </dd>
+
+                  <dt>SHA-256</dt>
+                  <dd className="plate-mono tabular" title={activeSpecItem.sha256}>
+                    {activeSpecItem.sha256.slice(0, 12)}...{activeSpecItem.sha256.slice(-8)}
+                  </dd>
+                </dl>
+
+                <div className="plate-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-compact"
+                    onClick={() =>
+                      handleCopy(activeSpecItem.sha256, `${activeSpecItem.id} SHA-256 checksum`)
+                    }
+                  >
+                    Copy SHA-256
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-compact"
+                    onClick={() => handleCopy(citationText, `${activeSpecItem.id} citation`)}
+                  >
+                    Copy Citation
+                  </button>
+                  <a
+                    className="btn btn-secondary btn-compact"
+                    href={activeSpecItem.downloadHref}
+                    download={activeSpecItem.downloadFilename}
+                  >
+                    Download .md
+                  </a>
+                  <a
+                    className="plate-repo-link"
+                    href="https://github.com/zenbanez/livingpriceatlas"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Source Repo
+                  </a>
+                </div>
+              </details>
 
               <p className="copy-feedback" aria-live="polite">
                 {copyStatus}
