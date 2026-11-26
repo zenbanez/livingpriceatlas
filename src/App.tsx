@@ -1054,6 +1054,91 @@ export default function App() {
           </div>
         </section>
 
+        <section
+          className="overview-video-section"
+          aria-labelledby="overview-video-title"
+        >
+          <div className="container">
+            <div className="overview-video-grid">
+              <div className="video-embed-plate">
+                <div className="plate-header">
+                  <h2 id="overview-video-title" className="plate-title">
+                    What Should a Public Road Actually Cost?
+                  </h2>
+                  <span className="plate-kicker tabular">60s Explainer</span>
+                </div>
+
+                <div className="video-frame-wrap">
+                  <iframe
+                    src="https://www.youtube-nocookie.com/embed/HZcyiXxFrtE?rel=0&modestbranding=1"
+                    title="What Should a Public Road Actually Cost? - The Living Price Atlas"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+
+                <div className="video-embed-footer">
+                  <p className="video-embed-caption">
+                    A quick walkthrough of why flat price books fall short, how Economic
+                    Triangulation works, and how we&rsquo;re building the rules in the open.
+                  </p>
+                  <a
+                    className="video-external-link"
+                    href="https://youtu.be/HZcyiXxFrtE"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Watch on YouTube &rarr;
+                  </a>
+                </div>
+              </div>
+
+              <aside
+                className="provenance-plate stage-status-plate"
+                aria-label="Project stage and roadmap"
+              >
+                <div className="plate-header">
+                  <h2 className="plate-title">Where We Are Now</h2>
+                  <span className="plate-kicker tabular">v1.0 Open Review</span>
+                </div>
+
+                <ol className="stage-list">
+                  <li className="stage-item stage-item-active">
+                    <span className="stage-badge tabular">Now</span>
+                    <div className="stage-copy">
+                      <strong>Core Specifications (LPA001 to LPA004)</strong>
+                      <p>
+                        {totalInvariants} invariants for contextual cost envelopes, open for public
+                        critique.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="stage-item">
+                    <span className="stage-badge tabular">Next</span>
+                    <div className="stage-copy">
+                      <strong>Governance &amp; Reference Design (LPA005 to LPA009)</strong>
+                      <p>
+                        Refined with feedback from engineers, contractors, suppliers, and agencies.
+                      </p>
+                    </div>
+                  </li>
+                  <li className="stage-item">
+                    <span className="stage-badge tabular">Then</span>
+                    <div className="stage-copy">
+                      <strong>Live Cost Envelopes &amp; API</strong>
+                      <p>
+                        Contextual price ranges anchored on public baselines and real field data.
+                      </p>
+                    </div>
+                  </li>
+                </ol>
+              </aside>
+            </div>
+          </div>
+        </section>
+
         <section id="series" className="series-band" aria-labelledby="series-heading">
           <div className="container">
             <div className="series-header">
